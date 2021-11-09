@@ -1,14 +1,27 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands import Bot, guild_only
+from discord.utils import get
 import random
 
-client = commands.Bot(command_prefix = '?')
+intents = discord.Intents().all()
+client = commands.Bot(command_prefix = '?', intents=intents)
 
 @client.event
 async def on_ready():
   await client.change_presence(status=discord.Status.dnd, activity=discord.Game('?help'))
   print('vergil online')
+
+#welcome
+@client.event
+async def on_member_join(member):
+  await client.get_channel(873600121793814568).send(f"{member.mention} geldi")
+  role = discord.utils.get(member.guild.roles, name='unverified')
+  await member.add_roles(role)
+
+#leave
+@client.event
+async def on_member_remove(member):
+  await client.get_channel(873600121793814568).send(f"{member.mention} gitti")
 
 #bot ping
 @client.command()
@@ -56,6 +69,7 @@ async def ban(ctx, member :  discord.Member, *,reason=None):
     await member.send(message)
     await member.ban(reason=reason)
     await ctx.send(f"{member} banlandı.")
+    await ctx.send("https://media.discordapp.net/attachments/735836120746557482/903365427843956756/ezgif.com-gif-maker_16.gif")
 
 #unban 
 @client.command()
@@ -83,4 +97,21 @@ async def d20(ctx):
   await ctx.send(random.choice(liste))
 liste = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
 
-client.run('your token')
+@client.command()
+async def avatar(ctx, *,  avamember : discord.Member=None):
+    userAvatarUrl = avamember.avatar_url
+    await ctx.send(userAvatarUrl)
+
+@client.command()
+@commands.has_permissions(administrator=True)
+async def kaydet(ctx, user : discord.Member, *, role : discord.Role):
+  if role.position > ctx.author.top_role.position:
+    return await ctx.send('bu rolü vermek için yetkin yok.') 
+  if role in user.roles:
+      await user.remove_roles(role)
+      await ctx.send(f"{role} rolü {user.mention}'dan alındı.")
+  else:
+      await user.add_roles(role)
+      await ctx.send(f"{role} rolü {user.mention}'a verildi.")
+  
+client.run('ODk5NDA3Mzg0NDAzOTA2NTgw.YWyUZg.EilqVsypM7foEqJvm59sl5PzKBI')
