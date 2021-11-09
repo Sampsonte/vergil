@@ -114,4 +114,4 @@ async def kaydet(ctx, user : discord.Member, *, role : discord.Role):
       await user.add_roles(role)
       await ctx.send(f"{role} rolü {user.mention}'a verildi.")
   
-client.run('ODk5NDA3Mzg0NDAzOTA2NTgw.YWyUZg.EilqVsypM7foEqJvm59sl5PzKBI')
+client.run('your token')
