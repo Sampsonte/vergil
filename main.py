@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord.utils import get
 import random
 
 intents = discord.Intents().all()
@@ -15,7 +14,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
   await client.get_channel(873600121793814568).send(f"{member.mention} geldi")
-  role = discord.utils.get(member.guild.roles, name='unverified')
+  role = discord.utils.get(member.guild.roles, name='unv')
   await member.add_roles(role)
 
 #leave
@@ -104,7 +103,7 @@ async def avatar(ctx, *,  avamember : discord.Member=None):
 
 @client.command()
 @commands.has_permissions(administrator=True)
-async def kaydet(ctx, user : discord.Member, *, role : discord.Role):
+async def rol(ctx, user : discord.Member, *, role : discord.Role):
   if role.position > ctx.author.top_role.position:
     return await ctx.send('bu rolü vermek için yetkin yok.') 
   if role in user.roles:
@@ -113,5 +112,32 @@ async def kaydet(ctx, user : discord.Member, *, role : discord.Role):
   else:
       await user.add_roles(role)
       await ctx.send(f"{role} rolü {user.mention}'a verildi.")
+
+@client.command(description="mute atmak")
+@commands.has_permissions(manage_messages=True)
+async def mute(ctx, member: discord.Member, *, reason=None):
+    guild = ctx.guild
+    mutedRole = discord.utils.get(guild.roles, name="Muted")
+
+    if not mutedRole:
+        mutedRole = await guild.create_role(name="Muted")
+
+        for channel in guild.channels:
+            await channel.set_permissions(mutedRole, speak=False, send_messages=False, read_message_history=True, read_messages=False)
+    embed = discord.Embed(title="muted", description=f"{member.mention} mutelendi ", colour=discord.Colour.light_gray())
+    embed.add_field(name="reason:", value=reason, inline=False)
+    await ctx.send(embed=embed)
+    await member.add_roles(mutedRole, reason=reason)
+    await member.send(f"{guild.name}'den mutelendin")
+
+@client.command(description="mutesi açmak.")
+@commands.has_permissions(manage_messages=True)
+async def unmute(ctx, member: discord.Member):
+   mutedRole = discord.utils.get(ctx.guild.roles, name="Muted")
+
+   await member.remove_roles(mutedRole)
+   await member.send(f"{ctx.guild.name}'dan muten açıldı")
+   embed = discord.Embed(title="unmute", description=f"{member.mention} unmuted ",colour=discord.Colour.light_gray())
+   await ctx.send(embed=embed)
   
-client.run('your token')
+client.run('your token here')
